@@ -1,0 +1,32 @@
+.trader-card {
+  border: none;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
+  transition: box-shadow 0.15s;
+}
+.trader-card:hover {
+  box-shadow: 0 4px 16px rgba(44, 62, 80, 0.13);
+}
+.trader-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e3e6f3;
+}
+.trader-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  background: #bbb;
+}
+.trader-status-dot.online {
+  background: #2ecc40;
+}
+.trader-status-dot.offline {
+  background: #bbb;
+}
+.trader-message-btn {
+  font-weight: 500;
+  border-radius: 10px;
+}

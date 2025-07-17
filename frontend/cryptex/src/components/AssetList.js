@@ -12,7 +12,7 @@ const coingeckoIdMap = {
   XRP: "ripple",
 };
 
-const AssetList = () => {
+const AssetList = ({ onTrade }) => {
   const [assets, setAssets] = useState([]);
   const [cgData, setCgData] = useState({});
   const prevPrices = useRef({});
@@ -65,8 +65,9 @@ const AssetList = () => {
     };
 
     fetchCoinGecko();
-    const interval = setInterval(fetchCoinGecko, 10000);
+    const interval = setInterval(fetchCoinGecko, 30000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assets]);
 
   return (
@@ -96,6 +97,7 @@ const AssetList = () => {
                 : "N/A"
             }
             priceChanged={priceChanged}
+            onTrade={() => onTrade(asset)}
           />
         );
       })}

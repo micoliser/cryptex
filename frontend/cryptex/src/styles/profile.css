@@ -95,6 +95,24 @@
   border: 1px solid #e5e7eb;
   animation: modalIn 0.2s;
 }
+.edit-profile-modal-backdrop {
+  position: fixed;
+  z-index: 1050;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.edit-profile-modal-content {
+  width: 100%;
+  max-width: 370px;
+  border: 1px solid #e5e7eb;
+  animation: modalIn 0.2s;
+}
 @keyframes modalIn {
   from {
     transform: translateY(30px);

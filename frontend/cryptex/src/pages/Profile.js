@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/AuthContext";
 import LogoutPop from "../components/LogoutPop";
 import EditProfileModal from "../components/EditProfileModal";
 import ChangePasswordModal from "../components/ChangePassword";
+import AssetsModal from "../components/AssetsModal";
 import { api } from "../utils/api";
 import "../styles/profile.css";
 
@@ -22,6 +23,7 @@ const Profile = () => {
   };
   const [showEditModal, setShowEditModal] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showAssetsModal, setShowAssetsModal] = useState(false);
 
   const handleProfileUpdated = async () => {
     try {
@@ -126,6 +128,43 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      {user?.vendor_profile && (
+        <div className="mt-3 w-100" style={{ maxWidth: 350 }}>
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <span className="fw-semibold text-primary" style={{ fontSize: 16 }}>
+              Supported Assets
+            </span>
+            <button
+              className="btn btn-sm btn-outline-primary"
+              onClick={() => setShowAssetsModal(true)}
+            >
+              Manage Assets
+            </button>
+          </div>
+          <div className="d-flex flex-wrap gap-2">
+            {user.vendor_profile.supported_assets.length === 0 && (
+              <span className="text-muted">No assets added yet.</span>
+            )}
+            {user.vendor_profile.supported_assets.map((asset) => (
+              <span
+                key={asset.id}
+                className="badge bg-primary text-light px-3 py-2"
+              >
+                {asset.symbol || asset.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {showAssetsModal && (
+        <AssetsModal
+          showAssetsModal={showAssetsModal}
+          setShowAssetsModal={setShowAssetsModal}
+          handleProfileUpdated={handleProfileUpdated}
+          supportedAssets={user.vendor_profile.supported_assets}
+          user={user}
+        />
+      )}
       <div className="profile-logout">
         <button
           className="btn btn-link text-dark d-flex align-items-center p-0"

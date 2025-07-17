@@ -1,4 +1,4 @@
-const MainCard = () => (
+const MainCard = ({ onTrade }) => (
   <div className="card p-4 mb-4 shadow-sm">
     <div className="card-body p-0">
       <div
@@ -12,11 +12,8 @@ const MainCard = () => (
         <div>Buy, sell and chat with traders securely</div>
       </div>
       <div className="d-flex gap-3">
-        <button className="btn btn-primary flex-fill">
-          <i className="bi bi-arrow-down me-2"></i>Buy
-        </button>
-        <button className="btn btn-light flex-fill">
-          <i className="bi bi-arrow-up me-2"></i>Sell
+        <button className="btn btn-primary flex-fill" onClick={onTrade}>
+          <i className="bi bi-arrow-up me-2"></i>Trade Now
         </button>
       </div>
     </div>

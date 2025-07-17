@@ -6,6 +6,7 @@ const Asset = ({
   currency,
   change,
   priceChanged,
+  onTrade,
 }) => (
   <div
     className={`card mb-3 border-0 shadow-sm w-100 ${
@@ -34,7 +35,9 @@ const Asset = ({
       </div>
     </div>
     <div className="p-3 pt-0 text-center">
-      <button className="btn btn-sm btn-success w-100">Trade Now</button>
+      <button className="btn btn-sm btn-success w-100" onClick={onTrade}>
+        Trade Now
+      </button>
     </div>
   </div>
 );
