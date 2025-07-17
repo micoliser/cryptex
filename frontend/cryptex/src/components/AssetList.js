@@ -17,6 +17,9 @@ const AssetList = () => {
   const [cgData, setCgData] = useState({});
   const prevPrices = useRef({});
 
+  const currency =
+    localStorage.getItem("preferredCurrency").toLowerCase() || "usd";
+
   useEffect(() => {
     const fetchAssets = async () => {
       try {
@@ -40,7 +43,7 @@ const AssetList = () => {
       if (ids.length) {
         try {
           const cgResponse = await axios.get(
-            `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids.join(
+            `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&ids=${ids.join(
               ","
             )}`
           );
@@ -56,13 +59,13 @@ const AssetList = () => {
             return cgMap;
           });
         } catch (error) {
-          console.error("Error fetching CoinGecko prices:", error);
+          // do nothing
         }
       }
     };
 
     fetchCoinGecko();
-    const interval = setInterval(fetchCoinGecko, 5000);
+    const interval = setInterval(fetchCoinGecko, 10000);
     return () => clearInterval(interval);
   }, [assets]);
 
@@ -86,6 +89,7 @@ const AssetList = () => {
             name={asset.name}
             symbol={asset.symbol}
             price={cg ? cg.current_price : "N/A"}
+            currency={currency}
             change={
               cg && typeof cg.price_change_percentage_24h === "number"
                 ? `${cg.price_change_percentage_24h.toFixed(2)}`

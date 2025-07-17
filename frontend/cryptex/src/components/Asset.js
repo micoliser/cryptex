@@ -1,4 +1,12 @@
-const Asset = ({ icon, name, symbol, price, change, priceChanged }) => (
+const Asset = ({
+  icon,
+  name,
+  symbol,
+  price,
+  currency,
+  change,
+  priceChanged,
+}) => (
   <div
     className={`card mb-3 border-0 shadow-sm w-100 ${
       priceChanged ? "price-flash" : ""
@@ -13,7 +21,9 @@ const Asset = ({ icon, name, symbol, price, change, priceChanged }) => (
         <div className="text-muted small">{symbol}</div>
       </div>
       <div className="text-end">
-        <div className="fw-bold">${price}</div>
+        <div className="fw-bold">
+          {(currency === "usd" ? "$" : "N") + price}
+        </div>
         <div
           className={`${
             change.startsWith("-") ? "text-danger" : "text-success"

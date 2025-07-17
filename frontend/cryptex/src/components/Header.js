@@ -27,7 +27,9 @@ const Header = ({ onMenuClick }) => {
           />
           <div>
             <div className="small text-muted">Welcome back</div>
-            <div className="fw-bold">Ifedimeji Omoniyi</div>
+            <div className="fw-bold">
+              {user?.first_name + " " + user?.last_name || user?.username}
+            </div>
           </div>
         </div>
       )}

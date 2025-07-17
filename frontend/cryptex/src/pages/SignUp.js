@@ -3,7 +3,7 @@ import SignUpForm from "../components/SignUpForm";
 import { useAuth } from "../contexts/AuthContext";
 
 const SignUp = () => {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
 
   return user ? (
     <Navigate replace to="/" />

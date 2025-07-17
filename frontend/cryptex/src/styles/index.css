@@ -2,3 +2,34 @@ body,
 html {
   overflow-x: hidden;
 }
+
+.logout-modal-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.logout-modal {
+  width: 100%;
+  max-width: 420px;
+  background: #ededed;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.04);
+  padding: 0 0 8px 0;
+  margin-bottom: 0;
+  animation: slideUp 0.2s;
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

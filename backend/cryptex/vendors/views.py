@@ -20,12 +20,9 @@ class VendorViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(username=username)
         if self.request.query_params.get('include_transactions', 'false').lower() == 'true':
             queryset = queryset.prefetch_related('transactions')
-        if self.request.query_params.get('include_assets', 'false').lower() == 'true':
-            queryset = queryset.prefetch_related('supported_assets')
         return queryset
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['include_transactions'] = self.request.query_params.get('include_transactions', 'false').lower() == 'true'
-        context['include_assets'] = self.request.query_params.get('include_assets', 'false').lower() == 'true'
         return context

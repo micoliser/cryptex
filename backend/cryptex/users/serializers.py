@@ -1,13 +1,19 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User
-from vendors.models import Vendor
 from transactions.serializers import TransactionSerializer
 
 
 class ShallowUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'is_vendor']
+        fields = [
+            'id', 'username',
+            'email', 'first_name',
+            'last_name', 'is_vendor',
+            'created_at', 'updated_at',
+            'password'
+        ]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,7 +28,8 @@ class UserSerializer(serializers.ModelSerializer):
             'email', 'first_name',
             'last_name', 'is_vendor',
             'transactions', 'created_at',
-            'updated_at', 'vendor_profile'
+            'updated_at', 'vendor_profile',
+            'password'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 
@@ -39,3 +46,30 @@ class UserSerializer(serializers.ModelSerializer):
             from vendors.serializers import ShallowVendorSerializer
             return ShallowVendorSerializer(obj.vendor).data
         return None
+    
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+        return user
+    
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """Custom serializer to include user data in JWT token response."""
+    
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        user = self.user
+        data['user'] = UserSerializer(user).data
+        return data

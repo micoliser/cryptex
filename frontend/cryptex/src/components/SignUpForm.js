@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import validator from "validator";
+import { useAuth } from "../contexts/AuthContext";
+import { api } from "../utils/api";
 
 const initialState = {
   fullName: "",
@@ -20,9 +22,13 @@ const initialErrors = {
 };
 
 const SignUpForm = () => {
+  const { login } = useAuth();
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState(initialErrors);
   const [showPassword, setShowPassword] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -82,9 +88,31 @@ const SignUpForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setApiError("");
     if (!validate()) return;
+    setLoading(true);
+    try {
+      const res = await api.post("/register/", {
+        username: form.username,
+        email: form.email,
+        password: form.password,
+        first_name: form.fullName.split(" ")[0],
+        last_name: form.fullName.split(" ")[1],
+      });
+      const { user, access, refresh } = res.data;
+      login({ ...user, access, refresh });
+      api.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+    } catch (err) {
+      setApiError(
+        err.response?.data?.email?.[0] ||
+          err.response?.data?.username?.[0] ||
+          "Sign up failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -223,9 +251,21 @@ const SignUpForm = () => {
           <div className="invalid-feedback d-block">{errors.agree}</div>
         )}
       </div>
-      <button type="submit" className="btn btn-primary w-100 mb-3">
-        Sign Up
+      <button
+        type="submit"
+        className="btn btn-primary w-100 mb-3"
+        disabled={loading}
+      >
+        {loading ? (
+          <span>
+            <span className="spinner-border spinner-border-sm me-2" />
+            Signing Up...
+          </span>
+        ) : (
+          "Sign Up"
+        )}
       </button>
+      {apiError && <div className="alert alert-danger">{apiError}</div>}
       <div className="d-flex align-items-center mb-3">
         <hr className="flex-grow-1" />
         <span className="mx-2 text-muted">OR</span>
