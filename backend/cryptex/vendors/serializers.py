@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import Vendor
 from users.models import User
-from transactions.serializers import TransactionSerializer
 from assets.serializers import AssetSerializer
 from assets.models import Asset
 
@@ -44,6 +43,7 @@ class VendorSerializer(serializers.ModelSerializer):
 
     def get_transactions(self, obj):
         """Get the transactions for the vendor."""
+        from transactions.serializers import TransactionSerializer
         if self.context.get('include_transactions', False):
             transactions = obj.transactions.all()
             return TransactionSerializer(transactions, many=True).data

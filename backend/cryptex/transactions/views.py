@@ -15,15 +15,18 @@ class TransactionViewSet(viewsets.ModelViewSet):
         by filtering against a query parameter in the URL.
         """
         queryset = super().get_queryset()
-        buyer_id = self.request.query_params.get('buyer_id')
+        seller_id = self.request.query_params.get('seller_id')
         vendor_id = self.request.query_params.get('vendor_id')
         asset_id = self.request.query_params.get('asset_id')
-        if buyer_id:
-            queryset = queryset.filter(buyer_id=buyer_id)
+        status = self.request.query_params.get('status')
+        if seller_id:
+            queryset = queryset.filter(seller_id=seller_id)
         if vendor_id:
             queryset = queryset.filter(vendor_id=vendor_id)
         if asset_id:
             queryset = queryset.filter(asset_id=asset_id)
+        if status:
+            queryset = queryset.filter(status=status)
         if self.request.query_params.get('include_messages', 'false').lower() == 'true':
             queryset = queryset.prefetch_related('messages')
         return queryset

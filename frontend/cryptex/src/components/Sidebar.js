@@ -72,6 +72,18 @@ const Sidebar = ({
                 <i className="bi bi-graph-up-arrow me-2"></i>Transactions
               </Link>
             </li>
+            <li className="nav-item mb-2">
+              <Link
+                className={`nav-link rounded ${
+                  isActive("/trades/pending")
+                    ? "active bg-primary text-white"
+                    : "text-dark"
+                }`}
+                to="/trades/pending"
+              >
+                <i className="bi bi-hourglass-split me-2"></i>Pending
+              </Link>
+            </li>
             {/* Status toggle for vendors */}
             {user.is_vendor && (
               <li className="nav-item mb-2">

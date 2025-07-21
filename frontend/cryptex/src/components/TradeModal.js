@@ -16,12 +16,12 @@ const coingeckoIdMap = {
 const TradeModal = ({ show, onClose, asset = undefined }) => {
   const [assets, setAssets] = useState([]);
   const [selected, setSelected] = useState(asset || null);
+  const [quantity, setQuantity] = useState("");
   const [amount, setAmount] = useState("");
-  const [usdValue, setUsdValue] = useState("");
   const [cgData, setCgData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [lastChanged, setLastChanged] = useState("amount");
+  const [lastChanged, setLastChanged] = useState("quantity");
 
   const navigate = useNavigate();
 
@@ -66,24 +66,24 @@ const TradeModal = ({ show, onClose, asset = undefined }) => {
 
   useEffect(() => {
     if (!cgData || !cgData.current_price) {
-      setUsdValue("");
+      setAmount("");
       return;
     }
-    if (lastChanged === "amount") {
-      const value = parseFloat(amount) * cgData.current_price;
-      setUsdValue(amount ? value.toFixed(2) : "");
+    if (lastChanged === "quantity") {
+      const value = parseFloat(quantity) * cgData.current_price;
+      setAmount(quantity ? value.toFixed(2) : "");
     } else if (lastChanged === "usd") {
-      const amt = parseFloat(usdValue) / cgData.current_price;
-      setAmount(usdValue ? amt.toFixed(8).replace(/\.?0+$/, "") : "");
+      const qty = parseFloat(amount) / cgData.current_price;
+      setQuantity(amount ? qty.toFixed(8).replace(/\.?0+$/, "") : "");
     }
     // eslint-disable-next-line
-  }, [amount, usdValue, cgData, lastChanged]);
+  }, [quantity, amount, cgData, lastChanged]);
 
   const handleContinue = () => {
-    if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
-      setError("Please enter a valid amount.");
+    if (!quantity || isNaN(quantity) || parseFloat(quantity) <= 0) {
+      setError("Please enter a valid quantity.");
       return;
-    } else if (!usdValue || isNaN(usdValue) || parseFloat(usdValue) < 5) {
+    } else if (!amount || isNaN(amount) || parseFloat(amount) < 5) {
       setError("Minimum trade amount is $5.");
       return;
     }
@@ -91,8 +91,8 @@ const TradeModal = ({ show, onClose, asset = undefined }) => {
       "tradeDetails",
       JSON.stringify({
         asset: selected,
+        quantity,
         amount,
-        usdValue,
       })
     );
     navigate("/select-trader");
@@ -139,8 +139,8 @@ const TradeModal = ({ show, onClose, asset = undefined }) => {
               onChange={(e) => {
                 const asset = assets.find((a) => a.id === e.target.value);
                 setSelected(asset);
+                setQuantity("");
                 setAmount("");
-                setUsdValue("");
               }}
               style={{ minWidth: 100 }}
             >
@@ -153,7 +153,7 @@ const TradeModal = ({ show, onClose, asset = undefined }) => {
           </div>
         </div>
         <div className="mb-2 fw-semibold" style={{ fontSize: 16 }}>
-          Amount
+          Quantity
         </div>
         <div className="bg-light rounded px-3 py-2 mb-2">
           <input
@@ -162,11 +162,11 @@ const TradeModal = ({ show, onClose, asset = undefined }) => {
             step="any"
             className="form-control border-0 bg-light"
             placeholder="0.00"
-            value={amount}
+            value={quantity}
             onChange={(e) => {
-              setAmount(e.target.value);
+              setQuantity(e.target.value);
               setError(null);
-              setLastChanged("amount");
+              setLastChanged("quantity");
             }}
             style={{ fontSize: 18 }}
           />
@@ -176,10 +176,10 @@ const TradeModal = ({ show, onClose, asset = undefined }) => {
             type="text"
             inputMode="decimal"
             className="form-control text-center"
-            value={usdValue ? `$${usdValue}` : "$0.00"}
+            value={amount ? `$${amount}` : "$0.00"}
             onChange={(e) => {
               let val = e.target.value.replace(/[^0-9.]/g, "");
-              setUsdValue(val);
+              setAmount(val);
               setError(null);
               setLastChanged("usd");
             }}

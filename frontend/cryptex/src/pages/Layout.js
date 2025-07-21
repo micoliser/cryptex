@@ -1,12 +1,72 @@
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 import LogoutPop from "../components/LogoutPop";
+import { useAuth } from "../contexts/AuthContext";
+import { api } from "../utils/api";
+import { useVendorWebSocket } from "../utils/websocket";
 
 const Layout = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
+  const [tradeNotif, setTradeNotif] = useState(null);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Listen for vendor notifications
+  useVendorWebSocket(user?.vendor_profile?.id, (data) => {
+    if (data.type === "trade_started") {
+      setTradeNotif(data.trade);
+      localStorage.setItem("vendorTradeNotif", JSON.stringify(data.trade));
+    }
+  });
+
+  useEffect(() => {
+    const savedNotif = localStorage.getItem("vendorTradeNotif");
+    if (location.pathname !== "/trade") {
+      setTradeNotif(null);
+      localStorage.removeItem("vendorTradeNotif");
+      return;
+    }
+    if (savedNotif) {
+      setTradeNotif(JSON.parse(savedNotif));
+    } else if (user?.is_vendor && user.vendor_profile?.id) {
+      api
+        .get(
+          `/transactions/?vendor_id=${user.vendor_profile.id}&status=pending`
+        )
+        .then((res) => {
+          if (res.data && res.data.length > 0) {
+            const latestTrade = res.data[res.data.length - 1];
+            setTradeNotif(latestTrade);
+            localStorage.setItem(
+              "vendorTradeNotif",
+              JSON.stringify(latestTrade)
+            );
+          }
+        });
+    }
+  }, [user]);
+
+  const handleTrade = () => {
+    if (tradeNotif) {
+      navigate(`/trade/${tradeNotif.id}`);
+      setTradeNotif(null);
+      localStorage.removeItem("vendorTradeNotif");
+    }
+  };
+
+  const handleCancelTrade = async () => {
+    if (tradeNotif) {
+      await api.patch(`/transactions/${tradeNotif.id}/`, {
+        status: "cancelled",
+      });
+      setTradeNotif(null);
+      localStorage.removeItem("vendorTradeNotif");
+    }
+  };
 
   return (
     <>
@@ -45,6 +105,50 @@ const Layout = () => {
         </div>
       </div>
       {showLogout && <LogoutPop setShowLogout={setShowLogout} />}
+      {tradeNotif && (
+        <div
+          style={{
+            position: "fixed",
+            top: 20,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 1055,
+            minWidth: 320,
+            maxWidth: 400,
+            background: "#fff",
+            border: "1px solid #e0e0e0",
+            borderRadius: 8,
+            boxShadow: "0 2px 16px rgba(0,0,0,0.10)",
+            padding: "18px 24px",
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+          }}
+          className="animate__animated animate__fadeInDown"
+        >
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 600, color: "#0d6efd" }}>
+              New Trade Request
+            </div>
+            <div style={{ fontSize: 15, marginTop: 2 }}>
+              <b>{tradeNotif.seller?.username || "A user"}</b> wants to trade{" "}
+              <b>{tradeNotif.asset?.name || tradeNotif.asset}</b>.<br />
+              Amount: $<b>{tradeNotif.amount}</b>
+            </div>
+            <div className="mt-2 d-flex gap-2">
+              <button
+                className="btn btn-sm btn-outline-danger"
+                onClick={handleCancelTrade}
+              >
+                Cancel
+              </button>
+              <button className="btn btn-sm btn-success" onClick={handleTrade}>
+                Trade Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

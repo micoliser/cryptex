@@ -18,6 +18,9 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         sender_id = self.request.query_params.get('sender_id')
         recipient_id = self.request.query_params.get('recipient_id')
+        transaction_id = self.request.query_params.get('transaction_id')
+        if transaction_id:
+            queryset = queryset.filter(transaction_id=transaction_id)
         if sender_id:
             queryset = queryset.filter(sender_id=sender_id)
         if recipient_id:

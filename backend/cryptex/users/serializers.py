@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import User
-from transactions.serializers import TransactionSerializer
 
 
 class ShallowUserSerializer(serializers.ModelSerializer):
@@ -35,6 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_transactions(self, obj):
         """Get the transactions for the user."""
+        from transactions.serializers import TransactionSerializer
         if self.context.get('include_transactions', False):
             transactions = obj.transactions.all()
             return TransactionSerializer(transactions, many=True).data

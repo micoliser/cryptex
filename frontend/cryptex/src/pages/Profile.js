@@ -37,7 +37,7 @@ const Profile = () => {
     }
   };
 
-  return user ? (
+  return (
     <div className="bg-light min-vh-100 profile-root position-relative">
       <div className="d-flex align-items-center px-2 py-2 border-bottom profile-header">
         <button
@@ -176,8 +176,6 @@ const Profile = () => {
       </div>
       {showLogout && <LogoutPop setShowLogout={setShowLogout} />}
     </div>
-  ) : (
-    <Navigate replace to="/signin" />
   );
 };
 

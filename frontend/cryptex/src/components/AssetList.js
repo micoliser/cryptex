@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Asset from "./Asset";
 import axios from "axios";
+import toast from "react-hot-toast";
 import { api } from "../utils/api";
 
 const coingeckoIdMap = {
@@ -18,7 +19,7 @@ const AssetList = ({ onTrade }) => {
   const prevPrices = useRef({});
 
   const currency =
-    localStorage.getItem("preferredCurrency").toLowerCase() || "usd";
+    localStorage.getItem("preferredCurrency")?.toLowerCase() || "usd";
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -26,7 +27,9 @@ const AssetList = ({ onTrade }) => {
         const response = await api.get("/assets/");
         setAssets(response.data);
       } catch (error) {
-        console.error("Error fetching assets:", error);
+        toast.error(
+          "Error fetching assets, please refresh the page or try again later."
+        );
       }
     };
     fetchAssets();

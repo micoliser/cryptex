@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { api } from "../utils/api";
+import { fetchPendingTrades } from "../utils/utils";
 import { useAuth } from "../contexts/AuthContext";
 import "../styles/select-trader.css";
 
@@ -18,12 +20,26 @@ const SelectTrader = () => {
       navigate("/");
       return;
     }
+    try {
+      const pendingTrades = fetchPendingTrades(user);
+      if (pendingTrades.length > 0) {
+        toast.error(
+          "You have an existing pending trade. Go to pending trades to complete or cancel it before starting a new trade."
+        );
+        navigate("/trades/pending");
+        return;
+      }
+    } catch (error) {
+      toast.error("Failed to load pending trades.");
+      navigate("/");
+      return;
+    }
     api
       .get("/vendors/")
       .then((res) => {
         // Only vendors that support the asset
         const filtered = res.data.filter((v) => {
-          if (user.is_vendor && v.user.id === user.id) return false;
+          if (user?.is_vendor && v.user.id === user.id) return false;
           return v.supported_assets.some((a) => a.id === details.asset.id);
         });
         setVendors(filtered);
@@ -32,7 +48,48 @@ const SelectTrader = () => {
     // eslint-disable-next-line
   }, []);
 
-  const handleStartTrade = async () => {};
+  const handleStartTrade = async (vendor) => {
+    try {
+      const vendorPendingTrades = await fetchPendingTrades(vendor.user);
+      if (vendorPendingTrades.length > 0) {
+        toast.error(
+          "Vendor is currently busy with another trade. Please select a different vendor."
+        );
+        return;
+      }
+      const tradeDetails = JSON.parse(localStorage.getItem("tradeDetails"));
+      const res = await api.post("/transactions/", {
+        seller_id: user.id,
+        vendor_id: vendor.id,
+        asset_id: tradeDetails.asset.id,
+        quantity: tradeDetails.quantity,
+        amount: tradeDetails.amount,
+        status: "pending",
+      });
+
+      const ws = new window.WebSocket(
+        `ws://localhost:8000/ws/vendor/${vendor.id}/`
+      );
+      ws.onopen = () => {
+        console.log("WebSocket connection established");
+        ws.send(
+          JSON.stringify({
+            type: "trade_started",
+            trade: {
+              id: res.data.id,
+              seller: { username: user.username },
+              asset: { name: tradeDetails.asset.name },
+              amount: tradeDetails.amount,
+            },
+          })
+        );
+        ws.close();
+      };
+      navigate(`/trade/${res.data.id}`);
+    } catch (err) {
+      toast.error("Failed to start trade. Please try again.");
+    }
+  };
 
   if (!tradeDetails) return null;
 
@@ -95,7 +152,7 @@ const SelectTrader = () => {
                     className={`btn trader-message-btn px-3 fs-6 ${
                       isOnline ? "btn-primary" : "btn-secondary"
                     }`}
-                    onClick={handleStartTrade}
+                    onClick={() => handleStartTrade(vendor)}
                     disabled={!isOnline}
                     style={{
                       opacity: isOnline ? 1 : 0.6,

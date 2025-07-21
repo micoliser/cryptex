@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'rest_framework',
     'corsheaders',
     'assets',
@@ -82,6 +83,17 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'cryptex.wsgi.application'
+
+ASGI_APPLICATION = "cryptex.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 
 REST_FRAMEWORK = {
@@ -147,3 +159,15 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+from datetime import timedelta
+
+CELERY_BEAT_SCHEDULE = {
+    "auto-cancel-inactive-trades": {
+        "task": "transactions.tasks.auto_cancel_inactive_trades",
+        "schedule": timedelta(seconds=10),  # every 10 seconds
+    },
+}
