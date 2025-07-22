@@ -1,4 +1,5 @@
 import { useAuth } from "../contexts/AuthContext";
+import { defaultPic } from "../utils/utils";
 
 const Header = ({ onMenuClick }) => {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ const Header = ({ onMenuClick }) => {
       {user && (
         <div className="d-flex align-items-center">
           <img
-            src={user?.picture || "https://www.gravatar.com/avatar/?d=mp"}
+            src={user?.picture || defaultPic}
             alt="avatar"
             className="rounded-circle me-3"
             width={40}

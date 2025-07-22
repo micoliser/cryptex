@@ -1,0 +1,41 @@
+.trade-timer {
+  font-family: monospace;
+  font-size: 18px;
+}
+.trade-status-icon {
+  width: 250px;
+  height: 250px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.trade-status-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 140px;
+  pointer-events: none;
+}
+.trade-alert {
+  font-size: 15px;
+}
+.trade-chat-btn-container {
+  position: fixed;
+  bottom: 5%;
+  right: 10%;
+}
+.trade-chat-btn {
+  background: #fff;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px #0001;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}

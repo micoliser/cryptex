@@ -4,6 +4,9 @@ from .models import User
 
 
 class ShallowUserSerializer(serializers.ModelSerializer):
+    picture = serializers.ImageField(
+        use_url=True, required=False, allow_null=True
+    )
     class Meta:
         model = User
         fields = [
@@ -11,7 +14,7 @@ class ShallowUserSerializer(serializers.ModelSerializer):
             'email', 'first_name',
             'last_name', 'is_vendor',
             'created_at', 'updated_at',
-            'password'
+            'picture', 'password'
         ]
 
 
@@ -19,6 +22,9 @@ class UserSerializer(serializers.ModelSerializer):
     """Serializer for User model."""
     transactions = serializers.SerializerMethodField()
     vendor_profile = serializers.SerializerMethodField()
+    picture = serializers.ImageField(
+        use_url=True, required=False, allow_null=True
+    )
 
     class Meta:
         model = User
@@ -28,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name', 'is_vendor',
             'transactions', 'created_at',
             'updated_at', 'vendor_profile',
-            'password'
+            'picture', 'password'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
 

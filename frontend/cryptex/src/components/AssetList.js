@@ -3,15 +3,7 @@ import Asset from "./Asset";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { api } from "../utils/api";
-
-const coingeckoIdMap = {
-  BTC: "bitcoin",
-  ETH: "ethereum",
-  SOL: "solana",
-  USDC: "usd-coin",
-  USDT: "tether",
-  XRP: "ripple",
-};
+import { coingeckoIdMap } from "../utils/utils";
 
 const AssetList = ({ onTrade }) => {
   const [assets, setAssets] = useState([]);

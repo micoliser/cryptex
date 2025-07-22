@@ -8,3 +8,14 @@ export const fetchPendingTrades = async (user) => {
   );
   return pendingTrades;
 };
+
+export const coingeckoIdMap = {
+  BTC: "bitcoin",
+  ETH: "ethereum",
+  SOL: "solana",
+  USDC: "usd-coin",
+  USDT: "tether",
+  XRP: "ripple",
+};
+
+export const defaultPic = "https://www.gravatar.com/avatar/?d=mp";

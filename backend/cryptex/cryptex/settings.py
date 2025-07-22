@@ -171,3 +171,6 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": timedelta(seconds=10),  # every 10 seconds
     },
 }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

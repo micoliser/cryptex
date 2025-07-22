@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useState, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
 import LogoutPop from "../components/LogoutPop";
@@ -7,11 +6,11 @@ import EditProfileModal from "../components/EditProfileModal";
 import ChangePasswordModal from "../components/ChangePassword";
 import AssetsModal from "../components/AssetsModal";
 import { api } from "../utils/api";
+import { defaultPic } from "../utils/utils";
 import "../styles/profile.css";
 
 const Profile = () => {
   const { user, login } = useAuth();
-  const navigate = useNavigate();
   const [showLogout, setShowLogout] = useState(false);
   const [currency, setCurrency] = useState(
     localStorage.getItem("preferredCurrency") || "USD"
@@ -24,6 +23,25 @@ const Profile = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showAssetsModal, setShowAssetsModal] = useState(false);
+
+  const fileInputRef = useRef(null);
+
+  const handlePictureChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("picture", file);
+
+    try {
+      const res = await api.patch(`/users/${user.id}/`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("Profile picture updated!");
+      login({ ...user, ...res.data });
+    } catch (err) {
+      toast.error("Failed to update profile picture.");
+    }
+  };
 
   const handleProfileUpdated = async () => {
     try {
@@ -39,20 +57,10 @@ const Profile = () => {
 
   return (
     <div className="bg-light min-vh-100 profile-root position-relative">
-      <div className="d-flex align-items-center px-2 py-2 border-bottom profile-header">
-        <button
-          className="btn btn-link text-dark p-0 me-2"
-          onClick={() => navigate(-1)}
-          aria-label="Back"
-        >
-          <i className="bi bi-arrow-left" style={{ fontSize: 22 }} />
-        </button>
-        <h5 className="mb-0 mx-auto text-primary fw-bold">Profile</h5>
-      </div>
       <div className="d-flex flex-column align-items-center mt-4">
         <div className="profile-avatar">
           <img
-            src={user?.picture || "https://www.gravatar.com/avatar/?d=mp"}
+            src={user?.picture || defaultPic}
             className="rounded-circle"
             alt="avatar"
           />
@@ -61,6 +69,19 @@ const Profile = () => {
             style={{ background: "#2ecc40" }}
           />
         </div>
+        <button
+          className="btn btn-sm btn-outline-primary mt-2"
+          onClick={() => fileInputRef.current.click()}
+        >
+          Change
+        </button>
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handlePictureChange}
+        />
         <div className="fw-bold profile-username">{user?.username}</div>
         <div className="text-muted profile-email">{user?.email}</div>
         {user?.vendor_profile?.description && (

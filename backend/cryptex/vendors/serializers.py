@@ -52,5 +52,5 @@ class VendorSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         """Get the user profile for the vendor."""
         from users.serializers import ShallowUserSerializer
-        return ShallowUserSerializer(obj.user).data
+        return ShallowUserSerializer(obj.user, context=self.context).data
 

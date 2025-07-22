@@ -1,105 +1,118 @@
-import { useState } from "react";
-import { isHexString } from "ethers";
-import base64url from "base64url";
-import bs58 from "bs58";
-import toast from "react-hot-toast";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { api } from "../utils/api";
+import { useAuth } from "../contexts/AuthContext";
+import TransactionItem from "../components/TransactionItem";
+import { coingeckoIdMap } from "../utils/utils";
 
 function Transactions() {
-  const [txHash, setTxHash] = useState("");
-  const [inputError, setInputError] = useState("");
+  const { user } = useAuth();
+  const [transactions, setTransactions] = useState([]);
+  const [cgData, setCgData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  function isEvmHash(hash) {
-    return isHexString(hash, 32);
-  }
+  useEffect(() => {
+    api.get("/transactions/").then((res) => {
+      const txs = res.data
+        .filter(
+          (t) => t.seller?.id === user.id || t.vendor?.user?.id === user.id
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      setTransactions(txs);
+      setLoading(false);
+    });
+  }, [user.id]);
 
-  function isSolanaHash(hash) {
-    if (typeof hash !== "string") return false;
-    if (hash.length < 43 || hash.length > 88) return false;
-    try {
-      bs58.decode(hash);
-      return true;
-    } catch {
-      return false;
-    }
-  }
+  // Fetch CoinGecko data for all unique asset symbols in transactions
+  useEffect(() => {
+    const symbols = [
+      ...new Set(
+        transactions
+          .map(
+            (tx) =>
+              tx.asset?.symbol?.toUpperCase() ||
+              (typeof tx.asset === "string" ? tx.asset.toUpperCase() : null)
+          )
+          .filter(Boolean)
+      ),
+    ];
+    const ids = symbols.map((sym) => coingeckoIdMap[sym]).filter(Boolean);
+    if (!ids.length) return;
 
-  function isTronHash(hash) {
-    return (
-      typeof hash === "string" &&
-      hash.length === 64 &&
-      /^[0-9a-fA-F]+$/.test(hash)
-    );
-  }
-
-  function isTonHash(hash) {
-    if (typeof hash !== "string") return false;
-    if (!/^[A-Za-z0-9_\-+/]{43,44}=?$/.test(hash)) return false;
-    try {
-      // Convert base64url to base64 if needed
-      let base64 = hash.replace(/-/g, "+").replace(/_/g, "/");
-      while (base64.length % 4 !== 0) {
-        base64 += "=";
+    const fetchCoinGecko = async () => {
+      try {
+        const cgResponse = await fetch(
+          `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids.join(
+            ","
+          )}`
+        );
+        const data = await cgResponse.json();
+        const cgMap = {};
+        data.forEach((coin) => {
+          cgMap[coin.symbol.toUpperCase()] = coin;
+        });
+        setCgData(cgMap);
+      } catch (e) {
+        // ignore
       }
-      atob(base64);
-      return true;
-    } catch {
-      return false;
-    }
-  }
+    };
+    fetchCoinGecko();
+  }, [transactions]);
 
-  // BTC (hex, 64 chars)
-  function isBtcHash(hash) {
+  const grouped = transactions.reduce((acc, tx) => {
+    const date = new Date(tx.created_at).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    acc[date] = acc[date] || [];
+    acc[date].push(tx);
+    return acc;
+  }, {});
+
+  if (loading) {
     return (
-      typeof hash === "string" &&
-      hash.length === 64 &&
-      /^[0-9a-fA-F]+$/.test(hash)
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ minHeight: 300 }}
+      >
+        <span className="spinner-border text-primary" /> Loading transactions...
+      </div>
     );
   }
-
-  function isValidHash(hash) {
-    return (
-      isEvmHash(hash) ||
-      isSolanaHash(hash) ||
-      isTronHash(hash) ||
-      isTonHash(hash) ||
-      isBtcHash(hash)
-    );
-  }
-
-  const handleSendTokens = async () => {
-    if (!isValidHash(txHash)) {
-      setInputError("Invalid transaction hash");
-      return;
-    }
-    toast.success("Transaction hash is valid");
-    setInputError("");
-  };
 
   return (
-    <div>
-      <div className="mb-3">
-        <label className="form-label fw-medium">Transaction Hash</label>
-        <input
-          type="text"
-          className={`form-control${inputError ? " is-invalid" : ""}`}
-          placeholder="Paste transaction hash here"
-          value={txHash}
-          onChange={(e) => {
-            setTxHash(e.target.value);
-            if (inputError) setInputError("");
-          }}
-        />
-        {inputError && <div className="invalid-feedback">{inputError}</div>}
-      </div>
-      <div className="d-flex gap-2">
-        <button
-          className="btn btn-primary flex-grow-1"
-          disabled={!txHash}
-          onClick={handleSendTokens}
-        >
-          Validate Hash
-        </button>
-      </div>
+    <div className="container py-4" style={{ maxWidth: 500 }}>
+      {Object.keys(grouped).length === 0 && (
+        <div className="alert alert-info text-center">
+          No transactions found.
+        </div>
+      )}
+      {Object.entries(grouped).map(([date, txs]) => (
+        <div key={date} className="mb-4">
+          <div className="fw-semibold mb-2" style={{ color: "#888" }}>
+            {date}
+          </div>
+          {txs.map((tx) => (
+            <TransactionItem
+              key={tx.id}
+              tx={tx}
+              user={user}
+              cg={
+                cgData[
+                  tx.asset?.symbol?.toUpperCase() ||
+                    (typeof tx.asset === "string" ? tx.asset.toUpperCase() : "")
+                ]
+              }
+              onView={() => navigate(`/transactions/${tx.id}`)}
+            />
+          ))}
+        </div>
+      ))}
     </div>
   );
 }

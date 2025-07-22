@@ -3,12 +3,11 @@ import { FaPaperPlane } from "react-icons/fa";
 import useTradeWebSocket from "../utils/websocket";
 import { api } from "../utils/api";
 import toast from "react-hot-toast";
+import { defaultPic } from "../utils/utils";
+import "../styles/trade-chat.css";
 
-const defaultPic = "https://www.gravatar.com/avatar/?d=mp";
-
-// Utility to get the other user's id and display info
 function getRecipient(user, trade) {
-  // If current user is vendor, recipient is seller; else recipient is vendor's user
+  console.log("trade", trade);
   if (user.id === trade.vendor?.user?.id) {
     return {
       id: trade.seller?.id,
@@ -19,12 +18,12 @@ function getRecipient(user, trade) {
     return {
       id: trade.vendor?.user?.id,
       name: trade.vendor?.display_name,
-      picture: trade.vendor?.picture || defaultPic,
+      picture: trade.vendor?.user.picture || defaultPic,
     };
   }
 }
 
-const TradeChat = ({ open, onClose, user, trade }) => {
+const TradeChat = ({ open, onClose, user, trade, isHistory = false }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const textareaRef = useRef();
@@ -32,7 +31,6 @@ const TradeChat = ({ open, onClose, user, trade }) => {
 
   const recipient = getRecipient(user, trade);
 
-  // WebSocket: send and receive messages
   const onWSMessage = useCallback(
     (data) => {
       if (data.type === "chat_message") {
@@ -85,7 +83,6 @@ const TradeChat = ({ open, onClose, user, trade }) => {
     }
   }, [messages]);
 
-  // Auto-grow textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "38px";
@@ -128,7 +125,6 @@ const TradeChat = ({ open, onClose, user, trade }) => {
       return;
     }
 
-    // Send via WebSocket for real-time update
     sendWS({
       type: "chat_message",
       id: savedMsg.id,
@@ -141,67 +137,29 @@ const TradeChat = ({ open, onClose, user, trade }) => {
     setMessage("");
   };
 
+  console.log("recipient", recipient);
+
   return (
-    <div
-      className="position-fixed w-100 h-100"
-      style={{
-        inset: 0,
-        background: "rgba(0,0,0,0.25)",
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "center",
-        pointerEvents: "auto",
-      }}
-    >
-      <div
-        className="bg-white d-flex flex-column"
-        style={{
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          width: "100%",
-          maxWidth: 430,
-          height: "80vh",
-          boxShadow: "0 -4px 32px rgba(0,0,0,0.12)",
-          position: "relative",
-          margin: 0,
-          animation: "slideUp 0.25s cubic-bezier(.4,0,.2,1)",
-        }}
-      >
+    <div className="position-fixed w-100 h-100 tradechat-modal">
+      <div className="tradechat-sheet">
         {/* Header */}
-        <div className="d-flex align-items-center px-3 py-2 border-bottom">
+        <div className="d-flex align-items-center px-3 py-2 border-bottom tradechat-header">
           <img
             src={recipient.picture}
             alt="avatar"
-            className="me-3"
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: "50%",
-            }}
+            className="me-3 rounded-circle"
+            width={40}
+            height={40}
           />
           <div className="flex-grow-1 fw-semibold">{recipient.name}</div>
           <button
             onClick={onClose}
-            className="btn btn-link p-0"
-            style={{
-              fontSize: 22,
-              color: "#888",
-              textDecoration: "none",
-            }}
+            className="btn btn-link p-0 btn-close"
             aria-label="Close"
-          >
-            &times;
-          </button>
+          ></button>
         </div>
         {/* Messages */}
-        <div
-          className="flex-grow-1 px-3 py-2"
-          style={{
-            overflowY: "auto",
-            background: "#fafbfc",
-          }}
-        >
+        <div className="flex-grow-1 px-3 py-2 tradechat-messages">
           {messages.map((msg) => (
             <div
               key={msg.id}
@@ -212,37 +170,24 @@ const TradeChat = ({ open, onClose, user, trade }) => {
               <img
                 src={msg.sender.picture || defaultPic}
                 alt="avatar"
-                className={msg.isMe ? "ms-2" : "me-2"}
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: "50%",
-                }}
+                className={
+                  msg.isMe ? "ms-2 rounded-circle" : "me-2 rounded-circle"
+                }
+                width={32}
+                height={32}
               />
               <div>
                 <div
-                  style={{
-                    background: msg.isMe ? "#3777f0" : "#fff",
-                    color: msg.isMe ? "#fff" : "#222",
-                    borderRadius: 16,
-                    padding: "8px 14px",
-                    maxWidth: 200,
-                    fontSize: 15,
-                    boxShadow: msg.isMe
-                      ? "0 2px 8px #3777f033"
-                      : "0 2px 8px #0001",
-                    wordBreak: "break-word",
-                  }}
+                  className={`tradechat-bubble ${
+                    msg.isMe ? "tradechat-bubble-me" : "tradechat-bubble-other"
+                  }`}
                 >
                   {msg.content}
                 </div>
                 <div
-                  style={{
-                    fontSize: 11,
-                    color: "#888",
-                    marginTop: 2,
-                    textAlign: msg.isMe ? "right" : "left",
-                  }}
+                  className={`tradechat-time ${
+                    msg.isMe ? "text-end" : "text-start"
+                  }`}
                 >
                   {msg.time ||
                     (msg.timestamp &&
@@ -257,57 +202,29 @@ const TradeChat = ({ open, onClose, user, trade }) => {
           <div ref={messagesEndRef} />
         </div>
         {/* Input */}
-        <form
-          onSubmit={handleSend}
-          className="d-flex align-items-end gap-2 px-3 py-2 border-top bg-white"
-        >
-          <textarea
-            ref={textareaRef}
-            rows={1}
-            placeholder="Type your message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            className="form-control"
-            style={{
-              borderRadius: 20,
-              background: "#fafbfc",
-              resize: "none",
-              minHeight: 38,
-              maxHeight: 120,
-              overflowY: "auto",
-              scrollbarWidth: "none", // Firefox
-              msOverflowStyle: "none", // IE/Edge
-            }}
-          />
-          <button
-            type="submit"
-            className="btn btn-link p-0 d-flex align-items-center justify-content-center"
-            style={{
-              color: "#3777f0",
-              fontSize: 22,
-            }}
-            aria-label="Send"
+        {!isHistory && (
+          <form
+            onSubmit={handleSend}
+            className="d-flex align-items-end gap-2 px-3 py-2 border-top bg-white"
           >
-            <FaPaperPlane size={25} />
-          </button>
-          <style>
-            {`
-              textarea::-webkit-scrollbar {
-                display: none;
-              }
-            `}
-          </style>
-        </form>
+            <textarea
+              ref={textareaRef}
+              rows={1}
+              placeholder="Type your message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="form-control tradechat-textarea"
+            />
+            <button
+              type="submit"
+              className="btn btn-link p-0 d-flex align-items-center justify-content-center"
+              aria-label="Send"
+            >
+              <FaPaperPlane size={25} />
+            </button>
+          </form>
+        )}
       </div>
-      {/* Add keyframes for slideUp animation */}
-      <style>
-        {`
-          @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-          }
-        `}
-      </style>
     </div>
   );
 };

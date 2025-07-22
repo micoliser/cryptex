@@ -3,15 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { api } from "../utils/api";
-
-const coingeckoIdMap = {
-  BTC: "bitcoin",
-  ETH: "ethereum",
-  SOL: "solana",
-  USDC: "usd-coin",
-  USDT: "tether",
-  XRP: "ripple",
-};
+import { coingeckoIdMap } from "../utils/utils";
 
 const TradeModal = ({ show, onClose, asset = undefined }) => {
   const [assets, setAssets] = useState([]);

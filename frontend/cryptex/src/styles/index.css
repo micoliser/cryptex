@@ -16,6 +16,24 @@ body {
   left: 0 !important;
 }
 
+.trade-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1055;
+  min-width: 320px;
+  max-width: 400px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .logout-modal-overlay {
   position: fixed;
   left: 0;

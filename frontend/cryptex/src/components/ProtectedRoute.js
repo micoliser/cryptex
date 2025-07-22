@@ -1,4 +1,3 @@
-// ProtectedRoute.js
 import { useAuth } from "../contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import toast from "react-hot-toast";

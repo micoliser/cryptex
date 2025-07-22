@@ -8,6 +8,7 @@ import useTradeWebSocket from "../utils/websocket";
 import SellerTrade from "../components/SellerTrade";
 import VendorTrade from "../components/VendorTrade";
 import TradeChat from "../components/TradeChat";
+import "../styles/trade.css";
 
 const INACTIVITY_LIMIT = 10 * 60;
 
@@ -238,9 +239,7 @@ const TradePage = () => {
         <div className="mb-3">
           <div className="alert alert-info">
             <b>Time left to start this trade:</b>{" "}
-            <span style={{ fontFamily: "monospace", fontSize: 18 }}>
-              {formatTime(timeLeft)}
-            </span>
+            <span className="trade-timer">{formatTime(timeLeft)}</span>
           </div>
         </div>
       )}
@@ -267,16 +266,7 @@ const TradePage = () => {
         </div>
       </div>
       <div className="d-flex justify-content-center my-3">
-        <div
-          style={{
-            width: 250,
-            height: 250,
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <div className="trade-status-icon">
           <i
             className="bi bi-arrow-repeat"
             style={{
@@ -286,17 +276,7 @@ const TradePage = () => {
               transition: "color 0.3s",
             }}
           />
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              textAlign: "center",
-              width: "140px",
-              pointerEvents: "none",
-            }}
-          >
+          <div className="trade-status-text">
             <div
               style={{
                 fontWeight: 500,
@@ -319,8 +299,7 @@ const TradePage = () => {
               : statusKey === "completed"
               ? "alert-success"
               : "alert-danger"
-          } mb-0`}
-          style={{ fontSize: 15 }}
+          } mb-0 trade-alert`}
         >
           {statusKey === "pending" ? (
             isSeller ? (
@@ -333,14 +312,14 @@ const TradePage = () => {
                 verify and complete the trade.
                 <br />
                 <br />
-                <b className="text-danger" style={{ fontWeight: 1000 }}>
+                <b className="text-danger fw-bold">
                   Always make sure you verify the current rate with the vendor
                   and agree on the price recieved in Naira before you send the
                   assets
                 </b>
                 <br />
                 <br />
-                <b className="text-primary" style={{ fontWeight: 1000 }}>
+                <b className="text-primary fw-bold">
                   Only send using BTC, SOL, TRX, TON or any EVM network
                 </b>
                 <br />
@@ -357,14 +336,14 @@ const TradePage = () => {
                 sellers account details and make the transfer in Naira.
                 <br />
                 <br />
-                <b className="text-danger" style={{ fontWeight: 1000 }}>
+                <b className="text-danger fw-bold">
                   Always make sure you specify the current rate with the seller
                   and agree on the price to be sent in Naira before you send the
                   receiving address
                 </b>
                 <br />
                 <br />
-                <b className="text-primary" style={{ fontWeight: 1000 }}>
+                <b className="text-primary fw-bold">
                   Only receive using BTC, SOL, TRX, TON or any EVM network
                 </b>
                 <br />
@@ -415,21 +394,10 @@ const TradePage = () => {
         ))}
       {statusKey === "pending" &&
         (!chatOpen ? (
-          <div style={{ position: "fixed", bottom: "5%", right: "10%" }}>
+          <div className="trade-chat-btn-container">
             <button
               onClick={() => setChatOpen(true)}
-              style={{
-                background: "#fff",
-                border: "none",
-                borderRadius: "50%",
-                boxShadow: "0 2px 8px #0001",
-                width: 60,
-                height: 60,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-              }}
+              className="trade-chat-btn"
               aria-label="Open chat"
             >
               <BsChatDots size={50} color="#3777f0" />

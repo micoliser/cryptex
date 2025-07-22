@@ -106,26 +106,7 @@ const Layout = () => {
       </div>
       {showLogout && <LogoutPop setShowLogout={setShowLogout} />}
       {tradeNotif && (
-        <div
-          style={{
-            position: "fixed",
-            top: 20,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 1055,
-            minWidth: 320,
-            maxWidth: 400,
-            background: "#fff",
-            border: "1px solid #e0e0e0",
-            borderRadius: 8,
-            boxShadow: "0 2px 16px rgba(0,0,0,0.10)",
-            padding: "18px 24px",
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-          }}
-          className="animate__animated animate__fadeInDown"
-        >
+        <div className="animate__animated animate__fadeInDown trade-notification">
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 600, color: "#0d6efd" }}>
               New Trade Request

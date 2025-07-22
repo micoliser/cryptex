@@ -8,6 +8,7 @@ import SelectTrader from "../pages/SelectTrader";
 import TradePage from "../pages/Trade";
 import PendingTrade from "../pages/PendingTrade";
 import Transactions from "../pages/Transactions";
+import TransactionDetail from "../pages/TransactionDetail";
 import TradeCompleted from "../pages/TradeCompleted";
 import Layout from "../pages/Layout";
 import { AuthProvider } from "../contexts/AuthContext";
@@ -63,15 +64,23 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="transactions/:id"
+              element={
+                <ProtectedRoute>
+                  <TransactionDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trade/:id/completed"
+              element={
+                <ProtectedRoute>
+                  <TradeCompleted />
+                </ProtectedRoute>
+              }
+            />
           </Route>
-          <Route
-            path="/trade/:id/completed"
-            element={
-              <ProtectedRoute>
-                <TradeCompleted />
-              </ProtectedRoute>
-            }
-          />
         </Routes>
       </AuthProvider>
       <Toaster />

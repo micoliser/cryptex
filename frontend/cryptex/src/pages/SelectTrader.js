@@ -95,7 +95,9 @@ const SelectTrader = () => {
 
   return (
     <div className="container py-4">
-      <h4 className="mb-3 text-primary fw-bold">Select a Trader</h4>
+      <h4 className="mb-3 text-primary fw-bold">
+        Select a trader to trade with
+      </h4>
       <div className="mb-3">
         <span className="fw-semibold">Asset:</span> {tradeDetails.asset.name} (
         {tradeDetails.asset.symbol})

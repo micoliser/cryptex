@@ -44,9 +44,6 @@ const PendingTrade = () => {
         <div className="card-body">
           {pendingTrade ? (
             <>
-              <h3 className="mb-4 text-primary fw-bold text-center">
-                Pending Trade
-              </h3>
               <div className="mb-3">
                 <div>
                   <b>Asset:</b> {pendingTrade.asset?.name || pendingTrade.asset}
