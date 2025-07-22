@@ -1,8 +1,10 @@
+import { useNavigate } from "react-router";
 import { useAuth } from "../contexts/AuthContext";
 import { defaultPic } from "../utils/utils";
 
 const Header = ({ onMenuClick }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="d-flex align-items-center justify-content-between bg-light rounded p-2">
@@ -18,7 +20,11 @@ const Header = ({ onMenuClick }) => {
         <h3 className="text-primary fw-bold mb-0">Cryptex</h3>
       </div>
       {user && (
-        <div className="d-flex align-items-center">
+        <div
+          className="d-flex align-items-center"
+          onClick={() => navigate("/profile")}
+          style={{ cursor: "pointer" }}
+        >
           <img
             src={user?.picture || defaultPic}
             alt="avatar"

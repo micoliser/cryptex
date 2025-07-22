@@ -48,6 +48,7 @@ const Layout = () => {
           }
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleTrade = () => {

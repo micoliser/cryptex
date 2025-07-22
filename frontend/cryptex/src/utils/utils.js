@@ -9,6 +9,15 @@ export const fetchPendingTrades = async (user) => {
   return pendingTrades;
 };
 
+export const googleLogin = async (credentialResponse, login) => {
+  const res = await api.post("/auth/google/", {
+    credential: credentialResponse.credential,
+  });
+  const { user, access, refresh } = res.data;
+  login({ ...user, access, refresh });
+  api.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+};
+
 export const coingeckoIdMap = {
   BTC: "bitcoin",
   ETH: "ethereum",

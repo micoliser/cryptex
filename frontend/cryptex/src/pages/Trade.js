@@ -156,6 +156,7 @@ const TradePage = () => {
       })
       .catch(() => toast.error("Failed to load trade"))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, user]);
 
   const handleCancel = () => setShowCancelModal(true);

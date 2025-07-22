@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import validator from "validator";
+import toast from "react-hot-toast";
+import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../utils/api";
+import { googleLogin } from "../utils/utils";
 
 const SignIn = () => {
   const { login, user } = useAuth();
@@ -12,6 +15,9 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+
+  const location = useLocation();
+  const verifyMsg = location.state?.verifyMsg;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,12 +51,26 @@ const SignIn = () => {
       login({ ...userData, access, refresh });
       api.defaults.headers.common["Authorization"] = `Bearer ${access}`;
     } catch (err) {
+      console.error("Login failed:", err);
       setApiError(
         err.response?.data?.detail ||
+          (err.response?.data?.error &&
+            `${err.response.data.error} Please check your email for verification link`) ||
           "Login failed. Please check your credentials."
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await googleLogin(credentialResponse, login);
+      toast.success("Success");
+    } catch (err) {
+      toast.error(
+        "An error occured while trying to sign you in, please try again"
+      );
     }
   };
 
@@ -63,6 +83,7 @@ const SignIn = () => {
         <div className="mb-4 text-muted" style={{ fontSize: 16 }}>
           Log In to your Cryptex account
         </div>
+        {verifyMsg && <div className="alert alert-success">{verifyMsg}</div>}
         <form onSubmit={handleSubmit} noValidate>
           {/* username */}
           <div className="mb-3">
@@ -75,7 +96,7 @@ const SignIn = () => {
                 className={`form-control border-start-0 ${
                   errors.username ? "is-invalid" : ""
                 }`}
-                placeholder="Email Address or Username"
+                placeholder="Username"
                 name="username"
                 value={form.username}
                 onChange={handleChange}
@@ -118,9 +139,9 @@ const SignIn = () => {
             )}
           </div>
           <div className="mb-3 text-end">
-            <a href="#" className="text-primary small">
+            <Link to="/forgot-password" className="text-primary small">
               Forgot Password?
-            </a>
+            </Link>
           </div>
           <button
             type="submit"
@@ -136,19 +157,42 @@ const SignIn = () => {
               "Log In"
             )}
           </button>
-          {apiError && <div className="alert alert-danger">{apiError}</div>}
+          {apiError && (
+            <div className="alert alert-danger">
+              {apiError}
+              {apiError.includes("verification") && (
+                <button
+                  className="btn btn-link p-0 ms-2"
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await api.post("/resend-verification-email/", {
+                        username: form.username,
+                      });
+                      toast.success(
+                        "Verification email resent. Please check your inbox."
+                      );
+                    } catch (err) {
+                      toast.error("Failed to resend verification email.");
+                    }
+                  }}
+                >
+                  Resend Email
+                </button>
+              )}
+            </div>
+          )}
           <div className="d-flex align-items-center mb-3">
             <hr className="flex-grow-1" />
             <span className="mx-2 text-muted">OR</span>
             <hr className="flex-grow-1" />
           </div>
-          <button
-            type="button"
-            className="btn btn-outline-secondary w-100 mb-4"
-          >
-            <i className="bi bi-google me-2" style={{ color: "#ea4335" }}></i>
-            Sign In with Google
-          </button>
+          <GoogleLogin
+            className="btn btn-outline-secondary w-100 mb-2"
+            buttonText="Sign up with Google"
+            onSuccess={handleGoogleSuccess}
+            onError={() => toast.error("An error occured. Please try again")}
+          />
         </form>
         <div className="text-center mt-3">
           <span className="text-muted">Don't have an account? </span>

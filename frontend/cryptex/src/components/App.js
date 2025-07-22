@@ -10,7 +10,11 @@ import PendingTrade from "../pages/PendingTrade";
 import Transactions from "../pages/Transactions";
 import TransactionDetail from "../pages/TransactionDetail";
 import TradeCompleted from "../pages/TradeCompleted";
+import VerifyEmail from "../pages/VerifyEmail";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 import Layout from "../pages/Layout";
+import NotFound from "../pages/NotFound";
 import { AuthProvider } from "../contexts/AuthContext";
 import ProtectedRoute from "./ProtectedRoute";
 import "../styles/index.css";
@@ -24,6 +28,9 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="signup" element={<SignUp />} />
             <Route path="signin" element={<SignIn />} />
+            <Route path="verify-email" element={<VerifyEmail />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
             <Route
               path="profile"
               element={
@@ -80,6 +87,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </AuthProvider>

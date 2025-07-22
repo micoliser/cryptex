@@ -1,8 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { useNavigate, Navigate } from "react-router-dom";
 import validator from "validator";
+import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../utils/api";
+import { googleLogin } from "../utils/utils";
+import toast from "react-hot-toast";
 
 const initialState = {
   fullName: "",
@@ -22,13 +26,15 @@ const initialErrors = {
 };
 
 const SignUpForm = () => {
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState(initialErrors);
   const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -101,9 +107,9 @@ const SignUpForm = () => {
         first_name: form.fullName.split(" ")[0],
         last_name: form.fullName.split(" ")[1],
       });
-      const { user, access, refresh } = res.data;
-      login({ ...user, access, refresh });
-      api.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+      const { detail } = res.data;
+      toast.success(detail);
+      navigate("/signin", { state: { verifyMsg: detail } });
     } catch (err) {
       setApiError(
         err.response?.data?.email?.[0] ||
@@ -115,7 +121,20 @@ const SignUpForm = () => {
     }
   };
 
-  return (
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await googleLogin(credentialResponse, login);
+      toast.success("Success");
+    } catch (err) {
+      toast.error(
+        "An error occured while trying to sign you in, please try again"
+      );
+    }
+  };
+
+  return user ? (
+    <Navigate replace to="/" />
+  ) : (
     <form className="mt-4" onSubmit={handleSubmit} noValidate>
       {/* Full Name */}
       <div className="mb-3">
@@ -244,8 +263,8 @@ const SignUpForm = () => {
           onChange={handleChange}
         />
         <label className="form-check-label" htmlFor="agree">
-          I agree to the <a href="#">Terms of Service</a> and{" "}
-          <a href="#">Privacy Policy</a>
+          I agree to the <a href="/terms">Terms of Service</a> and{" "}
+          <a href="/privacy">Privacy Policy</a>
         </label>
         {errors.agree && (
           <div className="invalid-feedback d-block">{errors.agree}</div>
@@ -271,14 +290,12 @@ const SignUpForm = () => {
         <span className="mx-2 text-muted">OR</span>
         <hr className="flex-grow-1" />
       </div>
-      <button type="button" className="btn btn-outline-secondary w-100 mb-2">
-        <i className="bi bi-google me-2" style={{ color: "#ea4335" }}></i>
-        Sign Up with Google
-      </button>
-      <button type="button" className="btn btn-outline-secondary w-100 mb-2">
-        <i className="bi bi-apple me-2" style={{ color: "#000" }}></i>
-        Sign Up with Apple
-      </button>
+      <GoogleLogin
+        className="btn btn-outline-secondary w-100 mb-2"
+        buttonText="Sign up with Google"
+        onSuccess={handleGoogleSuccess}
+        onError={() => toast.error("An error occured. Please try again")}
+      />
       <div className="text-center mt-3">
         <span className="text-muted">Already have an account? </span>
         <Link to="/signin" className="text-primary">
