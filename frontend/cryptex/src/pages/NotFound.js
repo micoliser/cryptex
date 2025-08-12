@@ -29,7 +29,7 @@ const NotFound = () => (
         Page Not Found
       </h4>
       <div className="mb-4 text-muted" style={{ fontSize: 16 }}>
-        Sorry, the page you’re looking for doesn’t exist or has been moved.
+        Sorry, the page you are looking for does not exist or has been moved.
       </div>
       <Link
         to="/"
